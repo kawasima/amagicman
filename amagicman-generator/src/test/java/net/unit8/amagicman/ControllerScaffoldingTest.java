@@ -9,10 +9,15 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
 import net.unit8.amagicman.task.CopyTask;
 import net.unit8.amagicman.task.JavaByTemplateTask;
 import net.unit8.amagicman.task.PomTask;
+import net.unit8.amagicman.task.SqlTask;
 import org.junit.Test;
+import org.slf4j.helpers.Util;
 
 import java.io.IOException;
 
@@ -42,7 +47,7 @@ public class ControllerScaffoldingTest {
 
     @Test
     public void test() throws IOException, ParseException {
-        PathResolver pathResolver = new PathResolver(null, "test1", "target/test1");
+        PathResolver pathResolver = new PathResolverImpl(null, "test1", "target/test1");
         Generator crudApplication = new Generator()
                 .setPathResolver(pathResolver)
                 .writing("Controller", g ->
@@ -56,11 +61,15 @@ public class ControllerScaffoldingTest {
                                         .filter(MethodDeclaration.class::isInstance)
                                         .map(MethodDeclaration.class::cast)
                                         .filter(method -> (method.getModifiers() & ModifierSet.PUBLIC) == 1)
-                                        .forEach(method -> {
-                                            method.getBody().accept(new DaoVisitor(), null);
-                                        });
+                                        .forEach(method -> method.getBody().accept(new DaoVisitor(), null));
                             });
                 })))
+                .writing("Sql", g ->
+                        g.task(new SqlTask("selectById.sql", "src/main/resources/example/hoge/Orders/selectById.sql", stmt -> {
+                            PlainSelect plainSelect = PlainSelect.class.cast(((Select) stmt).getSelectBody());
+                            plainSelect.setFromItem(new Table("orders"));
+                        }))
+                )
                 .writing("Maven", g -> {
                     g.task(new CopyTask("pom-test1.xml", "pom.xml"));
                     g.task(new PomTask()

@@ -12,6 +12,9 @@ import java.util.function.Consumer;
  */
 public class Generator {
     private static final Logger LOG = LoggerFactory.getLogger(Generator.class);
+    {
+        
+    }
     private List<MoldTask> tasks = new ArrayList<>();
     private PathResolver pathResolver;
 

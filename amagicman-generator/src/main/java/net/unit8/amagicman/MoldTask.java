@@ -3,7 +3,10 @@ package net.unit8.amagicman;
 /**
  * @author kawasima
  */
+@FunctionalInterface
 public interface MoldTask {
     void execute(PathResolver pathResolver) throws Exception;
-    String getDestinationPath();
+    default String getDestinationPath() {
+        return null;
+    }
 }
