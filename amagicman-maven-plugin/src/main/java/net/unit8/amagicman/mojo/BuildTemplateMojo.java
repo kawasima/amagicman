@@ -19,6 +19,7 @@ import java.util.jar.Manifest;
  * @author kawasima
  */
 @Mojo(name = "buildTemplate", defaultPhase = LifecyclePhase.PACKAGE, threadSafe = true, requiresDependencyResolution = ResolutionScope.RUNTIME)
+@Execute(lifecycle = "amagicman", phase = LifecyclePhase.PACKAGE, goal = "buildTemplate")
 public class BuildTemplateMojo extends AbstractMojo {
     /**
      * A file name for a distribution.

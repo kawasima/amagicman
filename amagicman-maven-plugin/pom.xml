@@ -38,12 +38,14 @@
                         <id>default-descriptor</id>
                         <phase>process-classes</phase>
                     </execution>
+                    <!--
                     <execution>
                         <id>generate-helpmojo</id>
                         <goals>
                             <goal>helpmojo</goal>
                         </goals>
                     </execution>
+                    -->
                 </executions>
             </plugin>
         </plugins>
