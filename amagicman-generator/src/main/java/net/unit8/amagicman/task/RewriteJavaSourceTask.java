@@ -5,21 +5,16 @@ import com.github.javaparser.ast.CompilationUnit;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 
 /**
  * @author kawasima
  */
-public class JavaByTemplateTask  implements GenTask {
-    private String source;
+public class RewriteJavaSourceTask implements GenTask {
     private String destination;
-    private JavaTemplateProcess process;
+    private RewriteJavaSourceProcess process;
 
-    public JavaByTemplateTask(String source, String destination, JavaTemplateProcess process) {
-        this.source = source;
+    public RewriteJavaSourceTask(String destination, RewriteJavaSourceProcess process) {
         this.destination = destination;
         this.process = process;
     }
@@ -27,8 +22,7 @@ public class JavaByTemplateTask  implements GenTask {
     @Override
     public void execute(PathResolver pathResolver) throws Exception {
         CompilationUnit cu;
-        try (InputStream is = pathResolver.templateAsStream(source)) {
-            if (is == null) throw new FileNotFoundException(source);
+        try (InputStream is = new FileInputStream(pathResolver.destinationAsFile(destination))) {
             cu = JavaParser.parse(is);
         }
 
@@ -39,12 +33,11 @@ public class JavaByTemplateTask  implements GenTask {
         }
     }
 
-    public interface JavaTemplateProcess {
+    public interface RewriteJavaSourceProcess {
         void process(CompilationUnit cu);
     }
 
     public String getDestinationPath() {
         return destination;
     }
-
 }

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import net.unit8.amagicman.MoldTask;
+import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -31,7 +31,7 @@ import java.util.stream.IntStream;
 /**
  * @author kawasima
  */
-public class PomTask implements MoldTask {
+public class PomTask implements GenTask {
     private String destination = "pom.xml";
     private List<Dependency> dependencies;
     DocumentBuilder documentBuilder;

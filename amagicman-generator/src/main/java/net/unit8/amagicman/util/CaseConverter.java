@@ -44,11 +44,7 @@ public class CaseConverter {
     protected static Function<String, String> upperCase = s -> s.toUpperCase(Locale.US);
 
     private static boolean charEquals(String s, int index, CharType type) {
-        if (index >= 0 && index < s.length()) {
-            return type.contains(s.charAt(index));
-        } else {
-            return false;
-        }
+        return index >= 0 && index < s.length() && type.contains(s.charAt(index));
     }
 
     private static void tokensPlusNew(List<String> tokens, String ss, int start, int end) {

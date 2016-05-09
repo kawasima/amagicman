@@ -24,6 +24,11 @@ public class PathResolverMock implements PathResolver {
         return os;
     }
 
+    @Override
+    public File destinationAsFile(String path) throws IOException {
+        return null;
+    }
+
     public String getWrittenString() {
         return new String(os.toByteArray(), StandardCharsets.UTF_8);
     }

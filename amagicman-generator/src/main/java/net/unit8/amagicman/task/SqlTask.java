@@ -2,7 +2,7 @@ package net.unit8.amagicman.task;
 
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
-import net.unit8.amagicman.MoldTask;
+import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 
 import java.io.FileNotFoundException;
@@ -13,7 +13,7 @@ import java.io.Writer;
 /**
  * @author kawasima
  */
-public class SqlTask implements MoldTask {
+public class SqlTask implements GenTask {
     private String destination;
     private String source;
     private SqlTemplateProcess process;

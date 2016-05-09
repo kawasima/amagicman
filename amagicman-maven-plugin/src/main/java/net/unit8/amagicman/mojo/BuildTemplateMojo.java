@@ -65,6 +65,7 @@ public class BuildTemplateMojo extends AbstractMojo {
                 target.putNextEntry(entry);
                 target.closeEntry();
             }
+
             for (File nestedFile: source.listFiles())
                 add(nestedFile, target);
             return;
@@ -94,7 +95,7 @@ public class BuildTemplateMojo extends AbstractMojo {
         try (JarOutputStream out = new JarOutputStream(
                 new FileOutputStream(outputJar), manifest)) {
             Files.readAllLines(distribution.toPath(), StandardCharsets.UTF_8).stream()
-                    .map(line -> line.trim())
+                    .map(String::trim)
                     .filter(line -> !line.isEmpty() && !line.startsWith("#"))
                     .forEach(line -> {
                         try { add(new File(line), out); }

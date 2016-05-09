@@ -40,11 +40,12 @@ public class PathResolverImpl implements PathResolver {
     }
 
     @Override
-    public OutputStream destinationAsStream(String path) throws IOException {
+    public File destinationAsFile(String path) throws IOException {
         File dest = new File(Optional.ofNullable(destinationDir)
                 .orElse(new File(".")), path);
 
         Files.createDirectories(dest.toPath().getParent());
-        return new FileOutputStream(dest);
+        return dest;
     }
+
 }

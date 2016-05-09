@@ -9,15 +9,14 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
 import net.unit8.amagicman.task.CopyTask;
 import net.unit8.amagicman.task.JavaByTemplateTask;
 import net.unit8.amagicman.task.PomTask;
 import net.unit8.amagicman.task.SqlTask;
 import org.junit.Test;
-import org.slf4j.helpers.Util;
 
 import java.io.IOException;
 

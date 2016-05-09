@@ -11,7 +11,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import net.unit8.amagicman.util.CaseConverter;
 
-import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * @author kawasima
@@ -22,14 +22,16 @@ public class ClassReplaceVisitor extends VoidVisitorAdapter {
     private String sourcePascalCase;
     private String sourceCamelCase;
 
-    private Set<String> replaceTargets;
-
-    private String sourcePackageName;
+    private Pattern sourcePackagePattern;
     private String destPackageName;
 
     public ClassReplaceVisitor(String sourcePackageName, String destPackageName,
                                String sourceName, String destName) {
-        this.sourcePackageName = sourcePackageName;
+        if (sourcePackageName.endsWith(".")) {
+            sourcePackageName = sourcePackageName.substring(0, sourcePackageName.length() - 1);
+        }
+        this.sourcePackagePattern = Pattern.compile(
+                sourcePackageName.replaceAll("\\.", "\\.") + "(\\.|$)");
         this.destPackageName = destPackageName;
         this.sourcePascalCase = CaseConverter.pascalCase(sourceName);
         this.sourceCamelCase = CaseConverter.camelCase(sourceName);
@@ -39,16 +41,17 @@ public class ClassReplaceVisitor extends VoidVisitorAdapter {
 
     @Override
     public void visit(PackageDeclaration dec, Object arg) {
-        dec.setName(ASTHelper.createNameExpr(destPackageName));
+        String templatePackageName = dec.getName().toStringWithoutComments();
+        dec.setName(ASTHelper.createNameExpr(
+                sourcePackagePattern.matcher(templatePackageName).replaceFirst(destPackageName)));
     }
 
     @Override
     public void visit(QualifiedNameExpr expr, Object arg) {
         String qualifier = expr.getQualifier().toStringWithoutComments();
-        if (qualifier.startsWith(sourcePackageName)) {
-            String regexp = sourcePackageName.replaceAll("\\.", "\\.");
+        if (sourcePackagePattern.matcher(qualifier).find()) {
             expr.setQualifier(ASTHelper.createNameExpr(
-                    qualifier.replaceFirst(regexp, destPackageName)));
+                    sourcePackagePattern.matcher(qualifier).replaceFirst(destPackageName)));
         }
         expr.setName(expr.getName().replaceFirst(sourcePascalCase, destPascalCase));
     }

@@ -4,7 +4,7 @@ import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.unit8.amagicman.MoldTask;
+import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 
 import javax.sql.DataSource;
@@ -15,7 +15,7 @@ import java.util.Optional;
 /**
  * @author kawasima
  */
-public class TableTask implements MoldTask {
+public class TableTask implements GenTask {
     private String createTable;
     private DataSource dataSource;
 

@@ -1,8 +1,6 @@
 package net.unit8.amagicman;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.util.Optional;
 
 /**
  * @author kawasima
@@ -12,5 +10,9 @@ public interface PathResolver {
 
     InputStream templateAsStream(String path);
 
-    OutputStream destinationAsStream(String path) throws IOException;
+    default OutputStream destinationAsStream(String path) throws IOException {
+        return new FileOutputStream(destinationAsFile(path));
+    }
+
+    File destinationAsFile(String path) throws IOException;
 }

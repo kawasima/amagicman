@@ -1,9 +1,8 @@
 package net.unit8.amagicman.task;
 
-import net.unit8.amagicman.MoldTask;
+import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -12,7 +11,7 @@ import java.io.OutputStream;
  *
  * @author kawasima
  */
-public class CopyTask implements MoldTask {
+public class CopyTask implements GenTask {
     private static final int BUF_SIZE = 4096;
     private String source;
     private String destination;
@@ -28,7 +27,7 @@ public class CopyTask implements MoldTask {
         try(InputStream is = pathResolver.templateAsStream(source);
             OutputStream os = pathResolver.destinationAsStream(destination)) {
             int count = 0;
-            int n = 0;
+            int n;
             while (-1 != (n = is.read(buffer))) {
                 os.write(buffer, 0, n);
                 count += n;
