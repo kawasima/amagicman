@@ -1,9 +1,5 @@
 package net.unit8.amagicman.task;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
 import org.w3c.dom.Document;
@@ -123,17 +119,37 @@ public class PomTask implements GenTask {
         return this;
     }
 
-    @Data
-    @RequiredArgsConstructor
-    @AllArgsConstructor
     public static class Dependency implements Serializable {
-        @NonNull
+        public Dependency(String groupId, String artifactId, String version) {
+            this(groupId, artifactId, version, null);
+        }
+
+        public Dependency(String groupId, String artifactId, String version, String scope) {
+            this.groupId = groupId;
+            this.artifactId = artifactId;
+            this.version = version;
+            this.scope = scope;
+        }
         private String groupId;
-        @NonNull
         private String artifactId;
-        @NonNull
         private String version;
         private String scope;
+
+        public String getGroupId() {
+            return groupId;
+        }
+
+        public String getArtifactId() {
+            return artifactId;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public String getScope() {
+            return scope;
+        }
     }
 
     public String getDestinationPath() {

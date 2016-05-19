@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
+import net.unit8.amagicman.util.JavaNodeUtils;
 
 import java.io.*;
 
@@ -29,7 +30,7 @@ public class RewriteJavaSourceTask implements GenTask {
         process.process(cu);
 
         try (Writer wtr = new OutputStreamWriter(pathResolver.destinationAsStream(destination))) {
-            wtr.write(cu.toString());
+            wtr.write(JavaNodeUtils.toString(cu));
         }
     }
 

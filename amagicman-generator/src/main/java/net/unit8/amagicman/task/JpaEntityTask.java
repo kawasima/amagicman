@@ -15,6 +15,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.unit8.amagicman.JavaFileUtils;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
+import net.unit8.amagicman.util.JavaNodeUtils;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -66,7 +67,7 @@ public class JpaEntityTask implements GenTask {
         });
 
         try (Writer writer = new OutputStreamWriter(pathResolver.destinationAsStream(destination))) {
-            writer.write(cu.toString());
+            writer.write(JavaNodeUtils.toString(cu));
         }
     }
 

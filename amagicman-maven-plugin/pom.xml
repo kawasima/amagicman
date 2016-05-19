@@ -21,7 +21,7 @@
 
     <groupId>net.unit8.amagicman</groupId>
     <artifactId>amagicman-maven-plugin</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>maven-plugin</packaging>
 
     <name>amagicman-maven-plugin</name>
@@ -67,14 +67,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.12</version>
+            <version>1.7.21</version>
         </dependency>
 
         <!-- For test -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
+            <version>1.7.21</version>
             <scope>test</scope>
         </dependency>
         <dependency>
