@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 public class Generator {
     private static final Logger LOG = LoggerFactory.getLogger(Generator.class);
 
-    private List<TaskListener> listeners = new ArrayList<>();
-    private List<GenTask> tasks = new ArrayList<>();
+    private final List<TaskListener> listeners = new ArrayList<>();
+    private final List<GenTask> tasks = new ArrayList<>();
     private PathResolver pathResolver;
 
     public void task(GenTask task) {
@@ -23,6 +23,7 @@ public class Generator {
     }
 
     public Generator writing(String section, Consumer<Generator> writing) {
+        LOG.debug("writing {}", section);
         writing.accept(this);
         return this;
     }
@@ -40,9 +41,9 @@ public class Generator {
     public void invoke() {
         for (GenTask task : tasks) {
             try {
-                listeners.stream().forEach(l -> l.beforeTask(task));
+                listeners.forEach(l -> l.beforeTask(task));
                 task.execute(pathResolver);
-                listeners.stream().forEach(l -> l.afterTask(task));
+                listeners.forEach(l -> l.afterTask(task));
                 LOG.info("create {}", task.getDestinationPath());
             } catch (Exception ex) {
                 LOG.error("", ex);

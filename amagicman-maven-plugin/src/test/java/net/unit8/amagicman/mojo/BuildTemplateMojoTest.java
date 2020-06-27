@@ -1,15 +1,15 @@
 package net.unit8.amagicman.mojo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
 /**
  * @author kawasima
  */
-public class BuildTemplateMojoTest {
+class BuildTemplateMojoTest {
     @Test
-    public void test() throws Exception {
+    void test() throws Exception {
         BuildTemplateMojo mojo = new BuildTemplateMojo();
         mojo.distribution = new File(getClass().getResource("/distro.txt").toURI());
         mojo.name = "test";

@@ -2,12 +2,12 @@ package net.unit8.amagicman.mojo;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -66,8 +66,9 @@ public class BuildTemplateMojo extends AbstractMojo {
                 target.closeEntry();
             }
 
-            for (File nestedFile: source.listFiles())
+            for (File nestedFile: Optional.ofNullable(source.listFiles()).orElse(new File[0])) {
                 add(nestedFile, target);
+            }
             return;
         }
 
@@ -88,7 +89,7 @@ public class BuildTemplateMojo extends AbstractMojo {
     }
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException {
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         File outputJar = new File(outputDirectory, name + ".jar");

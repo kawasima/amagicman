@@ -1,33 +1,30 @@
 package net.unit8.amagicman.task;
 
-import com.github.javaparser.ASTHelper;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
-import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.ModifierSet;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.MarkerAnnotationExpr;
-import com.github.javaparser.ast.type.ReferenceType;
+import com.github.javaparser.ast.expr.*;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.unit8.amagicman.JavaFileUtils;
 import net.unit8.amagicman.GenTask;
+import net.unit8.amagicman.JavaFileUtils;
 import net.unit8.amagicman.PathResolver;
+import net.unit8.amagicman.helper.JDBCTypeMapper;
+import net.unit8.amagicman.util.CaseConverter;
 import net.unit8.amagicman.util.JavaNodeUtils;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * @author kawasima
  */
 public class JpaEntityTask implements GenTask {
-    private String destination;
-    private CreateTable createTable;
+    private final String destination;
+    private final CreateTable createTable;
 
     public JpaEntityTask(String destination, CreateTable createTable) {
         this.destination = destination;
@@ -36,34 +33,47 @@ public class JpaEntityTask implements GenTask {
 
     @Override
     public void execute(PathResolver pathResolver) throws Exception {
+        JDBCTypeMapper jdbcTypeMapper = new JDBCTypeMapper();
         CompilationUnit cu = new CompilationUnit();
 
         String className = destination.replaceAll("(?:^.*/|^)([^/]+)\\.(.*)$", "$1");
-        ClassOrInterfaceDeclaration entityClass = new ClassOrInterfaceDeclaration(ModifierSet.PUBLIC, false, className);
-        entityClass.setAnnotations(Collections.singletonList(new MarkerAnnotationExpr(ASTHelper.createNameExpr("Entity"))));
-        ASTHelper.addTypeDeclaration(cu, entityClass);
+        ClassOrInterfaceDeclaration entityClass = cu.addClass(className);
+        entityClass.setModifiers(new NodeList<>(Modifier.publicModifier()));
+        entityClass.setInterface(false);
+        entityClass.addMarkerAnnotation("Entity");
+        entityClass.addAnnotation(new NormalAnnotationExpr(
+                new Name("Table"),
+                NodeList.nodeList(new MemberValuePair("name", new StringLiteralExpr(createTable.getTable().getName())))
+        ));
 
         Optional.ofNullable(JavaFileUtils.toPackageName(destination))
-                .ifPresent(pkgName -> cu.setPackage(new PackageDeclaration(ASTHelper.createNameExpr(pkgName))));
-
-        ReferenceType stringClass = ASTHelper.createReferenceType("String", 0);
+                .ifPresent(pkgName -> cu.setPackageDeclaration(new PackageDeclaration(new Name(pkgName))));
 
         Set<String> primaryKeys = createTable.getIndexes().stream()
                 .filter(index -> index.getType().equalsIgnoreCase("PRIMARY KEY"))
                 .flatMap(index -> index.getColumnsNames().stream())
                 .collect(Collectors.toSet());
 
-        List<ImportDeclaration> imports = new ArrayList<>();
-        imports.add(new ImportDeclaration(ASTHelper.createNameExpr("javax.persistence"), false, true));
+        NodeList<ImportDeclaration> imports = new NodeList<>(
+                new ImportDeclaration(new Name("javax.persistence"), false, true)
+        );
         cu.setImports(imports);
-        createTable.getColumnDefinitions().stream().forEach(column -> {
+        createTable.getColumnDefinitions().forEach(column -> {
             String name = column.getColumnName();
             ColDataType colDataType = column.getColDataType();
-            List<AnnotationExpr> annotations = new ArrayList<>();
+            Class<?> fieldType = jdbcTypeMapper.getJavaType(colDataType.getDataType());
+            FieldDeclaration columnField = entityClass.addField(fieldType, CaseConverter.camelCase(name), Modifier.Keyword.PRIVATE);
             if (primaryKeys.contains(name)) {
-                annotations.add(new MarkerAnnotationExpr(ASTHelper.createNameExpr("Id")));
+                columnField.addAnnotation(new MarkerAnnotationExpr(new Name("Id")));
             }
-            ASTHelper.addMember(entityClass, new FieldDeclaration(ModifierSet.PRIVATE, annotations, stringClass, ASTHelper.createVariableDeclarationExpr(stringClass, name).getVars()));
+            columnField.addAnnotation(new NormalAnnotationExpr(
+                    new Name("Column"),
+                    NodeList.nodeList(new MemberValuePair("name", new StringLiteralExpr(name)))));
+        });
+
+        entityClass.getFields().forEach(field -> {
+            field.createGetter();
+            field.createSetter();
         });
 
         try (Writer writer = new OutputStreamWriter(pathResolver.destinationAsStream(destination))) {

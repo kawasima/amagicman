@@ -9,14 +9,11 @@ import java.util.Optional;
  */
 public class PathResolverImpl implements PathResolver {
     private File projectDir;
-    private String templatePrefix;
+    private final String templatePrefix;
     private File destinationDir;
 
-    public PathResolverImpl() {
-    }
-
     public PathResolverImpl(String projectPath, String templatePrefix, String destinationPath) {
-        if (projectDir != null) {
+        if (projectPath != null) {
             this.projectDir = new File(projectPath);
         }
 

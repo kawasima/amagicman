@@ -1,8 +1,8 @@
 package net.unit8.amagicman.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author kawasima
@@ -10,38 +10,38 @@ import static org.junit.Assert.*;
 public class CaseConverterTest {
     @Test
     public void test() {
-        assertEquals("camelCase", CaseConverter.camelCase("CAMEL_CASE"));
-        assertEquals("PascalCase", CaseConverter.pascalCase("PASCAL_CASE"));
-        assertEquals("snake_case", CaseConverter.snakeCase("snakeCase"));
-        assertEquals("SCREAMING_SNAKE_CASE", CaseConverter.screamingSnakeCase("screaming snakeCase"));
+        assertThat(CaseConverter.camelCase("CAMEL_CASE")).isEqualTo("camelCase");
+        assertThat(CaseConverter.pascalCase("PASCAL_CASE")).isEqualTo("PascalCase");
+        assertThat(CaseConverter.snakeCase("snakeCase")).isEqualTo("snake_case");
+        assertThat(CaseConverter.screamingSnakeCase("screaming snakeCase")).isEqualTo("SCREAMING_SNAKE_CASE");
     }
 
     @Test
     public void oneChar() {
-        assertEquals("c", CaseConverter.camelCase("C"));
-        assertEquals("P", CaseConverter.pascalCase("p"));
-        assertEquals("s", CaseConverter.snakeCase("s"));
-        assertEquals("S", CaseConverter.screamingSnakeCase("s"));
+        assertThat(CaseConverter.camelCase("C")).isEqualTo("c");
+        assertThat(CaseConverter.pascalCase("p")).isEqualTo("P");
+        assertThat(CaseConverter.snakeCase("s")).isEqualTo("s");
+        assertThat(CaseConverter.screamingSnakeCase("s")).isEqualTo("S");
     }
 
     @Test
     public void containsNumber() {
-        assertEquals("c3P0", CaseConverter.camelCase("C3P0"));
-        assertEquals("C3P0", CaseConverter.pascalCase("C_3_P_0"));
-        assertEquals("s_3_key", CaseConverter.snakeCase("s3-key"));
-        assertEquals("c_3p_0", CaseConverter.snakeCase("c3p0"));
+        assertThat(CaseConverter.camelCase("C3P0")).isEqualTo("c3P0");
+        assertThat(CaseConverter.pascalCase("C_3_P_0")).isEqualTo("C3P0");
+        assertThat(CaseConverter.snakeCase("s3-key")).isEqualTo("s_3_key");
+        assertThat(CaseConverter.snakeCase("c3p0")).isEqualTo("c_3p_0");
     }
 
     @Test
     public void irregularCase() {
-        assertEquals("", CaseConverter.camelCase(""));
-        assertEquals("", CaseConverter.pascalCase(""));
-        assertEquals("", CaseConverter.snakeCase(""));
-        assertEquals("", CaseConverter.screamingSnakeCase(""));
+        assertThat(CaseConverter.camelCase("")).isEmpty();
+        assertThat(CaseConverter.pascalCase("")).isEmpty();
+        assertThat(CaseConverter.snakeCase("")).isEmpty();
+        assertThat(CaseConverter.screamingSnakeCase("")).isEmpty();
 
-        assertNull(CaseConverter.camelCase(null));
-        assertNull(CaseConverter.pascalCase(null));
-        assertNull(CaseConverter.snakeCase(null));
-        assertNull(CaseConverter.screamingSnakeCase(null));
+        assertThat(CaseConverter.camelCase(null)).isNull();
+        assertThat(CaseConverter.pascalCase(null)).isNull();
+        assertThat(CaseConverter.snakeCase(null)).isNull();
+        assertThat(CaseConverter.screamingSnakeCase(null)).isNull();
     }
 }

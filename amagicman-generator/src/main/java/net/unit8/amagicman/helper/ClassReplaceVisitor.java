@@ -1,29 +1,29 @@
 package net.unit8.amagicman.helper;
 
-import com.github.javaparser.ASTHelper;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.VariableDeclaratorId;
+import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.QualifiedNameExpr;
+import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import net.unit8.amagicman.util.CaseConverter;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
  * @author kawasima
  */
-public class ClassReplaceVisitor extends VoidVisitorAdapter {
-    private String destPascalCase;
-    private String destCamelCase;
-    private String sourcePascalCase;
-    private String sourceCamelCase;
+public class ClassReplaceVisitor<A> extends VoidVisitorAdapter<A> {
+    private final String destPascalCase;
+    private final String destCamelCase;
+    private final String sourcePascalCase;
+    private final String sourceCamelCase;
 
-    private Pattern sourcePackagePattern;
-    private String destPackageName;
+    private final Pattern sourcePackagePattern;
+    private final String destPackageName;
 
     public ClassReplaceVisitor(String sourcePackageName, String destPackageName,
                                String sourceName, String destName) {
@@ -40,46 +40,46 @@ public class ClassReplaceVisitor extends VoidVisitorAdapter {
     }
 
     @Override
-    public void visit(PackageDeclaration dec, Object arg) {
-        String templatePackageName = dec.getName().toStringWithoutComments();
-        dec.setName(ASTHelper.createNameExpr(
+    public void visit(PackageDeclaration dec, A arg) {
+        String templatePackageName = dec.getName().asString();
+        dec.setName(new Name(
                 sourcePackagePattern.matcher(templatePackageName).replaceFirst(destPackageName)));
     }
 
     @Override
-    public void visit(QualifiedNameExpr expr, Object arg) {
-        String qualifier = expr.getQualifier().toStringWithoutComments();
-        if (sourcePackagePattern.matcher(qualifier).find()) {
-            expr.setQualifier(ASTHelper.createNameExpr(
-                    sourcePackagePattern.matcher(qualifier).replaceFirst(destPackageName)));
-        }
-        expr.setName(expr.getName().replaceFirst(sourcePascalCase, destPascalCase));
+    public void visit(Name expr, A arg) {
+        expr.getQualifier().ifPresent(
+                qualifier -> {
+                    if (sourcePackagePattern.matcher(qualifier.asString()).find()) {
+                        qualifier.setQualifier(new Name(destPackageName));
+                    }
+                }
+        );
+        //expr.setName(expr.getName().replaceFirst(sourcePascalCase, destPascalCase));
     }
 
     @Override
-    public void visit(ClassOrInterfaceDeclaration expr, Object arg) {
-        expr.setName(expr.getName().replaceFirst(sourcePascalCase, destPascalCase));
+    public void visit(ClassOrInterfaceDeclaration expr, A arg) {
+        expr.getName().replace(new SimpleName(destPascalCase));
         super.visit(expr, arg);
     }
 
     @Override
-    public void visit(VariableDeclaratorId id, Object arg) {
-        id.setName(id.getName().replaceFirst(sourceCamelCase, destCamelCase));
-    }
-
-    @Override
-    public void visit(StringLiteralExpr expr, Object arg) {
+    public void visit(StringLiteralExpr expr, A arg) {
         expr.setValue(expr.getValue().replaceFirst(sourceCamelCase, destCamelCase));
     }
 
     @Override
-    public void visit(NameExpr expr, Object arg) {
-        expr.setName(expr.getName().replaceFirst(sourceCamelCase, destCamelCase));
+    public void visit(NameExpr expr, A arg) {
+        expr.replace(new NameExpr(sourceCamelCase),
+                new NameExpr(destCamelCase));
     }
 
     @Override
-    public void visit(ClassOrInterfaceType expr, Object arg) {
+    public void visit(ClassOrInterfaceType expr, A arg) {
         super.visit(expr, arg);
-        expr.setName(expr.getName().replaceFirst(sourcePascalCase, destPascalCase));
+        Optional.of(expr.getName())
+                .filter(name -> name.getIdentifier().equals(sourcePascalCase))
+                .ifPresent(name -> name.replace(new SimpleName(destPascalCase)));
     }
 }

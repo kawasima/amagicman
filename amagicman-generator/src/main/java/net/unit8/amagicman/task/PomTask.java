@@ -29,11 +29,16 @@ import java.util.stream.IntStream;
  */
 public class PomTask implements GenTask {
     private String destination = "pom.xml";
-    private List<Dependency> dependencies;
+    private final List<Dependency> dependencies;
     DocumentBuilder documentBuilder;
     XPathFactory xpath;
     TransformerFactory transformerFactory;
     File pomFile;
+
+    public PomTask(String destination) {
+        this();
+        setDestinationPath(destination);
+    }
 
     public PomTask() {
         dependencies = new ArrayList<>();
@@ -84,15 +89,26 @@ public class PomTask implements GenTask {
 
         for (Dependency dependency : dependencies) {
             NodeList pomDependencyList = selectAll(pomDependencies, "dependency");
-            if (!IntStream.range(0, pomDependencyList.getLength()).mapToObj(pomDependencyList::item)
-                    .anyMatch(pomDependency -> select(pomDependency, "groupId").getTextContent().trim().equals(dependency.getGroupId())
-                            && select(pomDependency, "artifactId").getTextContent().trim().equals(dependency.getArtifactId())
-                            && select(pomDependency, "version").getTextContent().trim().equals(dependency.getVersion()))) {
+            if (IntStream.range(0, pomDependencyList.getLength()).mapToObj(pomDependencyList::item)
+                    .noneMatch(pomDependency -> Optional.ofNullable(select(pomDependency, "groupId"))
+                            .map(node -> node.getTextContent().trim())
+                            .orElse("")
+                            .equals(dependency.getGroupId())
+                            && Optional.ofNullable(select(pomDependency, "artifactId"))
+                            .map(node -> node.getTextContent().trim())
+                            .orElse("")
+                            .equals(dependency.getArtifactId())
+                            && Optional.ofNullable(select(pomDependency, "version"))
+                            .map(node -> node.getTextContent().trim())
+                            .orElse("")
+                            .equals(dependency.getVersion()))) {
                 Node pomDependency = doc.createElement("dependency");
                 pomDependency.appendChild(Optional.of(doc.createElement("groupId")).map(el -> { el.setTextContent(dependency.getGroupId()); return el; }).get());
                 pomDependency.appendChild(Optional.of(doc.createElement("artifactId")).map(el -> { el.setTextContent(dependency.getArtifactId()); return el; }).get());
                 pomDependency.appendChild(Optional.of(doc.createElement("version")).map(el -> { el.setTextContent(dependency.getVersion()); return el; }).get());
-
+                Optional.ofNullable(dependency.getScope())
+                        .ifPresent(scope -> pomDependency
+                                .appendChild(Optional.of(doc.createElement("scope")).map(el -> { el.setTextContent(scope); return el; }).get()));
                 pomDependencies.appendChild(pomDependency);
             }
         }
@@ -115,25 +131,24 @@ public class PomTask implements GenTask {
     }
 
     public PomTask addDependency(String groupId, String artifactId, String version) {
-        dependencies.add(new Dependency(groupId, artifactId, version));
+        return addDependency(groupId, artifactId, version, null);
+    }
+    public PomTask addDependency(String groupId, String artifactId, String version, String scope) {
+        dependencies.add(new Dependency(groupId, artifactId, version, scope));
         return this;
     }
 
     public static class Dependency implements Serializable {
-        public Dependency(String groupId, String artifactId, String version) {
-            this(groupId, artifactId, version, null);
-        }
-
         public Dependency(String groupId, String artifactId, String version, String scope) {
             this.groupId = groupId;
             this.artifactId = artifactId;
             this.version = version;
             this.scope = scope;
         }
-        private String groupId;
-        private String artifactId;
-        private String version;
-        private String scope;
+        private final String groupId;
+        private final String artifactId;
+        private final String version;
+        private final String scope;
 
         public String getGroupId() {
             return groupId;
@@ -154,5 +169,9 @@ public class PomTask implements GenTask {
 
     public String getDestinationPath() {
         return destination;
+    }
+
+    public void setDestinationPath(String destination) {
+        this.destination = destination;
     }
 }

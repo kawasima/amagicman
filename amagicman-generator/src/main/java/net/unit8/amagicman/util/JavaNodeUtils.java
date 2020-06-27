@@ -1,15 +1,18 @@
 package net.unit8.amagicman.util;
 
 import com.github.javaparser.ast.CompilationUnit;
-import net.unit8.amagicman.helper.AmagicmanDumpVisitor;
+import com.github.javaparser.printer.PrettyPrintVisitor;
+import com.github.javaparser.printer.PrettyPrinterConfiguration;
 
 /**
  * @author kawasima
  */
 public class JavaNodeUtils {
     public static String toString(CompilationUnit cu) {
-        AmagicmanDumpVisitor visitor = new AmagicmanDumpVisitor();
+        final PrettyPrinterConfiguration config = new PrettyPrinterConfiguration();
+        config.setIndentSize(4);
+        PrettyPrintVisitor visitor = new PrettyPrintVisitor(config);
         visitor.visit(cu, null);
-        return visitor.getSource();
+        return visitor.toString();
     }
 }

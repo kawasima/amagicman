@@ -13,8 +13,8 @@ import java.io.OutputStream;
  */
 public class CopyTask implements GenTask {
     private static final int BUF_SIZE = 4096;
-    private String source;
-    private String destination;
+    private final String source;
+    private final String destination;
 
     public CopyTask(String source, String destination) {
         this.source = source;

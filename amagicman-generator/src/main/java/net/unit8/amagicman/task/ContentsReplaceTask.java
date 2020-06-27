@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
  * @author kawasima
  */
 public class ContentsReplaceTask implements GenTask {
-    private String destination;
-    private String source;
-    private ContentsReplaceProcessor processor;
+    private final String destination;
+    private final String source;
+    private final ContentsReplaceProcessor processor;
 
     public ContentsReplaceTask(String source, String destination, ContentsReplaceProcessor processor) {
         this.source = source;
@@ -41,6 +41,7 @@ public class ContentsReplaceTask implements GenTask {
         return destination;
     }
 
+    @FunctionalInterface
     public interface ContentsReplaceProcessor {
         String process(String contents);
     }

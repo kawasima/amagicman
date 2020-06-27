@@ -19,10 +19,9 @@ public class CaseConverter {
         UPPER('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
                 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'),
         LOWER('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'),
-        OTHER;
+                'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z');
 
-        private Set<Character> chars;
+        private final Set<Character> chars;
         CharType(Character... cs) {
             chars = new HashSet<>(Arrays.asList(cs));
         }
@@ -32,7 +31,7 @@ public class CaseConverter {
         }
     }
 
-    protected static Function<String, String> capitalize = s -> {
+    protected static final Function<String, String> capitalize = s -> {
         if (s.length() < 2) {
             return s.toUpperCase(Locale.US);
         } else {
@@ -40,8 +39,8 @@ public class CaseConverter {
         }
     };
 
-    protected static Function<String, String> lowerCase = s -> s.toLowerCase(Locale.US);
-    protected static Function<String, String> upperCase = s -> s.toUpperCase(Locale.US);
+    protected static final Function<String, String> lowerCase = s -> s.toLowerCase(Locale.US);
+    protected static final Function<String, String> upperCase = s -> s.toUpperCase(Locale.US);
 
     private static boolean charEquals(String s, int index, CharType type) {
         return index >= 0 && index < s.length() && type.contains(s.charAt(index));

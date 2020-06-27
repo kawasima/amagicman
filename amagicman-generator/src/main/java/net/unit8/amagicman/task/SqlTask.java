@@ -14,9 +14,9 @@ import java.io.Writer;
  * @author kawasima
  */
 public class SqlTask implements GenTask {
-    private String destination;
-    private String source;
-    private SqlTemplateProcess process;
+    private final String destination;
+    private final String source;
+    private final SqlTemplateProcess process;
 
     public SqlTask (String source, String destination, SqlTemplateProcess process) {
         this.source = source;

@@ -1,6 +1,6 @@
 package net.unit8.amagicman.task;
 
-import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
@@ -12,8 +12,8 @@ import java.io.*;
  * @author kawasima
  */
 public class RewriteJavaSourceTask implements GenTask {
-    private String destination;
-    private RewriteJavaSourceProcess process;
+    private final String destination;
+    private final RewriteJavaSourceProcess process;
 
     public RewriteJavaSourceTask(String destination, RewriteJavaSourceProcess process) {
         this.destination = destination;
@@ -24,7 +24,7 @@ public class RewriteJavaSourceTask implements GenTask {
     public void execute(PathResolver pathResolver) throws Exception {
         CompilationUnit cu;
         try (InputStream is = new FileInputStream(pathResolver.destinationAsFile(destination))) {
-            cu = JavaParser.parse(is);
+            cu = StaticJavaParser.parse(is);
         }
 
         process.process(cu);
@@ -34,6 +34,7 @@ public class RewriteJavaSourceTask implements GenTask {
         }
     }
 
+    @FunctionalInterface
     public interface RewriteJavaSourceProcess {
         void process(CompilationUnit cu);
     }

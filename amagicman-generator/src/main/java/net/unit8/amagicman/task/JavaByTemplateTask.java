@@ -1,6 +1,6 @@
 package net.unit8.amagicman.task;
 
-import com.github.javaparser.JavaParser;
+import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import net.unit8.amagicman.GenTask;
 import net.unit8.amagicman.PathResolver;
@@ -15,9 +15,9 @@ import java.io.Writer;
  * @author kawasima
  */
 public class JavaByTemplateTask  implements GenTask {
-    private String source;
-    private String destination;
-    private JavaTemplateProcess process;
+    private final String source;
+    private final String destination;
+    private final JavaTemplateProcess process;
 
     public JavaByTemplateTask(String source, String destination, JavaTemplateProcess process) {
         this.source = source;
@@ -30,7 +30,7 @@ public class JavaByTemplateTask  implements GenTask {
         CompilationUnit cu;
         try (InputStream is = pathResolver.templateAsStream(source)) {
             if (is == null) throw new FileNotFoundException(source);
-            cu = JavaParser.parse(is);
+            cu = StaticJavaParser.parse(is);
         }
 
         process.process(cu);

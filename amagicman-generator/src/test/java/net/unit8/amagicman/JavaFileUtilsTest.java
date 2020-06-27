@@ -1,8 +1,8 @@
 package net.unit8.amagicman;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author kawasima
@@ -10,7 +10,9 @@ import static org.junit.Assert.*;
 public class JavaFileUtilsTest {
     @Test
     public void test() {
-        assertEquals("abc.def", JavaFileUtils.toPackageName("abc/def/VwXyZ.java"));
-        assertNull(JavaFileUtils.toPackageName("VwXyZ.java"));
+        assertThat(JavaFileUtils.toPackageName("abc/def/VwXyZ.java"))
+                .isEqualTo("abc.def");
+        assertThat(JavaFileUtils.toPackageName("VwXyZ.java"))
+                .isNull();
     }
 }

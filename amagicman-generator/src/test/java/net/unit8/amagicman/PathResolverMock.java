@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
  * @author kawasima
  */
 public class PathResolverMock implements PathResolver {
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    final ByteArrayOutputStream os = new ByteArrayOutputStream();
 
     @Override
     public File project() {
@@ -16,17 +16,18 @@ public class PathResolverMock implements PathResolver {
 
     @Override
     public InputStream templateAsStream(String path) {
-        return null;
+        return Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(path);
     }
 
     @Override
-    public OutputStream destinationAsStream(String path) throws IOException {
+    public OutputStream destinationAsStream(String path) {
         return os;
     }
 
     @Override
-    public File destinationAsFile(String path) throws IOException {
-        return null;
+    public File destinationAsFile(String path) {
+        return new File(path);
     }
 
     public String getWrittenString() {
