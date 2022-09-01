@@ -10,7 +10,7 @@
         <javaparser.version>3.16.1</javaparser.version>
         <slf4j.version>1.7.30</slf4j.version>
         <jsqlparser.version>3.1</jsqlparser.version>
-        <jsoup.version>1.13.1</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
     </properties>
 
     <groupId>net.unit8.amagicman</groupId>
