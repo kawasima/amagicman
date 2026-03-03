@@ -15,28 +15,59 @@ import net.unit8.amagicman.util.JavaNodeUtils;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * A task that generates a JPA entity class from a parsed {@code CREATE TABLE} SQL statement.
+ *
+ * <p>The generated class is annotated with {@code @Entity} and {@code @Table}, and each
+ * column is mapped to a private field annotated with {@code @Column}. Primary key columns
+ * receive an additional {@code @Id} annotation. Getter and setter methods are generated
+ * for every field. SQL column types are mapped to Java types via {@link JDBCTypeMapper}.</p>
+ *
+ * <p>The destination file path determines both the class name (from the filename) and the
+ * package name (from the parent directory path).</p>
+ *
+ * <pre>{@code
+ * CreateTable createTable = (CreateTable) CCJSqlParserUtil.parse(
+ *     "CREATE TABLE users (id BIGINT PRIMARY KEY, name VARCHAR(255))");
+ * generator.task(new JpaEntityTask("com/example/entity/Users.java", createTable));
+ * }</pre>
+ *
  * @author kawasima
  */
 public class JpaEntityTask implements GenTask {
     private final String destination;
     private final CreateTable createTable;
 
+    /**
+     * Constructs a {@code JpaEntityTask}.
+     *
+     * @param destination relative path of the output Java file; the file name (without extension)
+     *                    is used as the class name, and the parent path is used as the package name
+     * @param createTable parsed {@code CREATE TABLE} statement that describes the entity's schema
+     */
     public JpaEntityTask(String destination, CreateTable createTable) {
         this.destination = destination;
         this.createTable = createTable;
     }
 
+    /**
+     * Generates the JPA entity class and writes it to the destination file.
+     *
+     * @param pathResolver resolver for the destination output
+     * @throws Exception if code generation or I/O fails
+     */
     @Override
     public void execute(PathResolver pathResolver) throws Exception {
         JDBCTypeMapper jdbcTypeMapper = new JDBCTypeMapper();
         CompilationUnit cu = new CompilationUnit();
 
-        String className = destination.replaceAll("(?:^.*/|^)([^/]+)\\.(.*)$", "$1");
+        String fileName = Path.of(destination).getFileName().toString();
+        String className = fileName.contains(".") ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
         ClassOrInterfaceDeclaration entityClass = cu.addClass(className);
         entityClass.setModifiers(new NodeList<>(Modifier.publicModifier()));
         entityClass.setInterface(false);
@@ -81,6 +112,9 @@ public class JpaEntityTask implements GenTask {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getDestinationPath() {
         return destination;

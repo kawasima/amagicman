@@ -17,6 +17,10 @@ import net.unit8.amagicman.task.PomTask;
 import net.unit8.amagicman.task.SqlTask;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -78,16 +82,146 @@ public class ControllerScaffoldingTest {
                 })))
                 .writing("Sql", g ->
                         g.task(new SqlTask("selectById.sql", "src/main/resources/example/hoge/Orders/selectById.sql", stmt -> {
-                            PlainSelect plainSelect = (PlainSelect) ((Select) stmt).getSelectBody();
+                            PlainSelect plainSelect = ((Select) stmt).getPlainSelect();
                             plainSelect.setFromItem(new Table("orders"));
                         }))
                 )
                 .writing("Maven", g -> {
                     g.task(new CopyTask("pom-test1.xml", "pom.xml"));
                     g.task(new PomTask()
-                            .addDependency("net.unit8.moshas", "moshas", "0.1.0"));
+                            .addDependency("net.unit8.moshas", "moshas", "0.3.0"));
                 });
 
         crudApplication.invoke();
+    }
+
+    @Test
+    public void generatorChaining() {
+        Generator generator = new Generator();
+        Generator result = generator.writing("Test", g -> {});
+        assertThat(result).isSameAs(generator);
+    }
+
+    @Test
+    public void taskExecutionInOrder() {
+        Generator generator = new Generator();
+        List<String> executionOrder = new ArrayList<>();
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {
+                executionOrder.add("task1");
+            }
+
+            @Override
+            public String getDestinationPath() {
+                return "path1";
+            }
+        });
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {
+                executionOrder.add("task2");
+            }
+
+            @Override
+            public String getDestinationPath() {
+                return "path2";
+            }
+        });
+
+        generator.invoke();
+        assertThat(executionOrder).containsExactly("task1", "task2");
+    }
+
+    @Test
+    public void taskListenerNotification() {
+        Generator generator = new Generator();
+        List<String> events = new ArrayList<>();
+
+        TaskListener listener = new TaskListener() {
+            @Override
+            public void beforeTask(GenTask task) {
+                events.add("before:" + task.getDestinationPath());
+            }
+
+            @Override
+            public void afterTask(GenTask task) {
+                events.add("after:" + task.getDestinationPath());
+            }
+        };
+
+        generator.addTaskListener(listener);
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {}
+
+            @Override
+            public String getDestinationPath() {
+                return "task1";
+            }
+        });
+
+        generator.invoke();
+        assertThat(events).containsExactly("before:task1", "after:task1");
+    }
+
+    @Test
+    public void taskExecutionContinuesAfterException() {
+        Generator generator = new Generator();
+        List<String> executed = new ArrayList<>();
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {
+                throw new RuntimeException("Task failed");
+            }
+
+            @Override
+            public String getDestinationPath() {
+                return "failed-task";
+            }
+        });
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {
+                executed.add("success-task");
+            }
+
+            @Override
+            public String getDestinationPath() {
+                return "success-task";
+            }
+        });
+
+        generator.invoke();
+        assertThat(executed).containsExactly("success-task");
+    }
+
+    @Test
+    public void pathResolverPassedToTasks() {
+        PathResolver resolver = new PathResolverImpl(null, "test", "target/test");
+        Generator generator = new Generator();
+
+        AtomicReference<PathResolver> passedResolver = new AtomicReference<>();
+        generator.setPathResolver(resolver);
+
+        generator.task(new GenTask() {
+            @Override
+            public void execute(PathResolver resolver) {
+                passedResolver.set(resolver);
+            }
+
+            @Override
+            public String getDestinationPath() {
+                return "test-path";
+            }
+        });
+
+        generator.invoke();
+        assertThat(passedResolver.get()).isSameAs(resolver);
     }
 }
